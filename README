@@ -1,0 +1,29 @@
+GTlib - GUI of Terminal Library
+=========================================
+This is a library created to implement a text-based terminal interface. Given the unique nature of E-comOS, you cannot use some UNIX libraries to perform this operation, so we created this library for developers to use.
+=========================================
+How to install it 
+-----------------------------------------
+GTlib is not pre-installed on your computer by default. If you need to install it, please use EPM (E-comOS Packages Manager).
+Canmand:
+  epm install dev-gtlib
+Only in this way can the computer properly run a file that contains this library (which is a C library).
+=========================================
+How to use it 
+-----------------------------------------
+In your code, use
+"#include <ecomos-gtlib>"
+On E-comOS computers, the compiler will automatically recognize this library. For developers, all you need to do next is pray that your users have installed GTlib to prevent them from bombarding you with complaints about missing header files on mailing lists.
+=========================================
+How to licensed it
+-----------------------------------------
+This library is build from ECLib , in order to comply with open source principles, we decided to use GPL 2.0. Using GPL 2.0 is for compatibility with ECLib's LGPL 2.1.
+-----------------------------------------
+Should we swap the licenses for the two libraries
+-----------------------------------------
+NO.Because of the binding of IPC information between GTlib and ECLib, you must use ECLib if you want to use GTlib; this cannot be changed, so it is unique.
+The problem with LGPL is that it's not as strict as GPL and AGPL, but it's not as lenient as MIT or Apache.
+Therefore, there may be more compliance issues to be aware of regarding this library and the programs that use it.
+=========================================
+END OF THE PASSAGE
+=========================================
