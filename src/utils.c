@@ -16,3 +16,15 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+#include "gtlib.h"
+#include <stdio.h>
+
+void gt_set_cursor_position(int x, int y) {
+    printf("\033[%d;%dH", y + 1, x + 1);
+    fflush(stdout);
+}
+
+void gt_set_cursor_visibility(bool visible) {
+    printf(visible ? "\033[?25h" : "\033[?25l");
+    fflush(stdout);
+}

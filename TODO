@@ -1,3 +1,4 @@
-1. Fix the low error #1
-2. Test use make
-3. Fast to end of this library's develop , my hair!
+- 1. Fix the low error #1
+- 2. Test use make
+- 3. Fast to end of this library's develop , my hair!
+- 4. TODO: Use actual ECLib IPC functions when available.

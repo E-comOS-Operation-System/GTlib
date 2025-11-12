@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude
+CFLAGS = -Wall -Wextra -std=c99 -Iinclude -Isrc
 SRCDIR = src
 OBJDIR = obj
 LIBDIR = lib

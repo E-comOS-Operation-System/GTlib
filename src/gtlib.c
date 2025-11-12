@@ -19,18 +19,52 @@
 #include "gtlib.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <termios.h>
+#include <sys/ioctl.h>
 
 // Internal structures are now defined in the header file
 
 static bool gt_initialized = false;
+static struct termios orig_termios;
+static int term_width = 80;
+static int term_height = 24;
 
 int gt_init(void) {
     if (gt_initialized) return 0;
+    
+    // Save original terminal settings
+    tcgetattr(STDIN_FILENO, &orig_termios);
+    
+    // Set raw mode
+    struct termios raw = orig_termios;
+    raw.c_lflag &= ~(ECHO | ICANON);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    
+    // Get terminal size
+    struct winsize ws;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0) {
+        term_width = ws.ws_col;
+        term_height = ws.ws_row;
+    }
+    
+    // Clear screen and hide cursor
+    printf("\033[2J\033[H\033[?25l");
+    fflush(stdout);
+    
     gt_initialized = true;
     return 0;
 }
 
 void gt_cleanup(void) {
+    if (!gt_initialized) return;
+    
+    // Restore terminal settings
+    printf("\033[2J\033[H\033[?25h");
+    fflush(stdout);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+    
     gt_initialized = false;
 }
 
@@ -112,19 +146,69 @@ void gt_get_window_geometry(gt_window_t *window, int *x, int *y, int *width, int
 }
 
 void gt_clear_window(gt_window_t *window) {
-    (void)window;
+    if (!window || !window->visible) return;
+    
+    for (int y = window->y; y < window->y + window->height && y < term_height; y++) {
+        printf("\033[%d;%dH", y + 1, window->x + 1);
+        for (int x = 0; x < window->width && window->x + x < term_width; x++) {
+            printf(" ");
+        }
+    }
+    fflush(stdout);
 }
 
 void gt_draw_char(gt_window_t *window, int x, int y, char ch, gt_color_t fg, gt_color_t bg, gt_attr_t attr) {
-    (void)window; (void)x; (void)y; (void)ch; (void)fg; (void)bg; (void)attr;
+    if (!window || !window->visible) return;
+    
+    int abs_x = window->x + x;
+    int abs_y = window->y + y;
+    
+    if (abs_x < 0 || abs_x >= term_width || abs_y < 0 || abs_y >= term_height) return;
+    
+    printf("\033[%d;%dH", abs_y + 1, abs_x + 1);
+    
+    // Set colors and attributes
+    if (attr & GT_ATTR_BOLD) printf("\033[1m");
+    if (attr & GT_ATTR_UNDERLINE) printf("\033[4m");
+    if (attr & GT_ATTR_REVERSE) printf("\033[7m");
+    
+    if (fg != GT_COLOR_DEFAULT) printf("\033[3%dm", fg);
+    if (bg != GT_COLOR_DEFAULT) printf("\033[4%dm", bg);
+    
+    printf("%c", ch);
+    printf("\033[0m"); // Reset attributes
+    fflush(stdout);
 }
 
 void gt_draw_string(gt_window_t *window, int x, int y, const char *str, gt_color_t fg, gt_color_t bg, gt_attr_t attr) {
-    (void)window; (void)x; (void)y; (void)str; (void)fg; (void)bg; (void)attr;
+    if (!window || !window->visible || !str) return;
+    
+    int pos_x = x;
+    for (const char *p = str; *p && pos_x < window->width; p++, pos_x++) {
+        gt_draw_char(window, pos_x, y, *p, fg, bg, attr);
+    }
 }
 
 void gt_draw_border(gt_window_t *window, gt_color_t fg, gt_color_t bg, gt_attr_t attr) {
-    (void)window; (void)fg; (void)bg; (void)attr;
+    if (!window || !window->visible) return;
+    
+    // Top and bottom borders
+    for (int x = 0; x < window->width; x++) {
+        gt_draw_char(window, x, 0, '-', fg, bg, attr);
+        gt_draw_char(window, x, window->height - 1, '-', fg, bg, attr);
+    }
+    
+    // Left and right borders
+    for (int y = 0; y < window->height; y++) {
+        gt_draw_char(window, 0, y, '|', fg, bg, attr);
+        gt_draw_char(window, window->width - 1, y, '|', fg, bg, attr);
+    }
+    
+    // Corners
+    gt_draw_char(window, 0, 0, '+', fg, bg, attr);
+    gt_draw_char(window, window->width - 1, 0, '+', fg, bg, attr);
+    gt_draw_char(window, 0, window->height - 1, '+', fg, bg, attr);
+    gt_draw_char(window, window->width - 1, window->height - 1, '+', fg, bg, attr);
 }
 
 void gt_refresh_window(gt_window_t *window) {
