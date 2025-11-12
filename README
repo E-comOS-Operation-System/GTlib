@@ -18,6 +18,7 @@ On E-comOS computers, the compiler will automatically recognize this library. Fo
 How to licensed it
 -----------------------------------------
 This library is build from ECLib , in order to comply with open source principles, we decided to use GPL 2.0. Using GPL 2.0 is for compatibility with ECLib's LGPL 2.1.
+Note: To maintain compatibility between GTlib and ECLib, the E-comOS User Mode Team does not accept any suggestions to use GNU GPL Version 2 (excluding) or higher.
 -----------------------------------------
 Should we swap the licenses for the two libraries
 -----------------------------------------
