@@ -146,6 +146,10 @@ const char *gt_get_widget_text(gt_widget_t *widget);
 void gt_set_widget_visible(gt_widget_t *widget, bool visible);
 void gt_destroy_widget(gt_widget_t *widget);
 void gt_set_widget_focus(gt_widget_t *widget);
+void gt_render_all_widgets(gt_window_t *window);
+void gt_focus_next_widget(gt_window_t *window);
+void gt_focus_prev_widget(gt_window_t *window);
+void gt_activate_focused_widget(gt_window_t *window);
 
 // 事件处理
 int gt_wait_event(gt_event_t *event, int timeout);

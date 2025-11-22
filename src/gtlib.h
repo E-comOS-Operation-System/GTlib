@@ -28,6 +28,7 @@ struct gt_window {
     char *title;
     bool visible;
     struct gt_widget *widgets;
+    struct gt_widget *focused_widget;
 };
 
 // Widget structure definition
@@ -38,6 +39,7 @@ struct gt_widget {
     gt_color_t fg, bg;
     gt_attr_t attr;
     bool visible;
+    bool focused;
     gt_button_callback_t callback;
     void *user_data;
     struct gt_widget *next;

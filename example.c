@@ -8,7 +8,10 @@
 void button_clicked(gt_widget_t *widget, void *user_data) {
     (void)widget;
     (void)user_data;
-    // Button callback - could update UI here
+    // 在屏幕底部显示按钮被点击的消息
+    printf("\033[25;1H\033[K");
+    printf("Button clicked! Press any key to continue...");
+    fflush(stdout);
 }
 
 int main(void) {
@@ -44,23 +47,42 @@ int main(void) {
     
     gt_create_textbox(window, 10, 11, 30, 3, "Type here...", 50);
     
-    // Refresh to draw all widgets
+    // Render all widgets
+    gt_render_all_widgets(window);
     gt_refresh_window(window);
     
     // Wait for user input
     gt_event_t event;
     printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    printf("Press ESC to exit...\n");
+    printf("Use arrow keys to navigate, ENTER to click, ESC to exit...\n");
     
     while (1) {
         if (gt_wait_event(&event, 100) == 0) {
             if (event.type == GT_EVENT_KEY_PRESS) {
-                if (event.data.key == GT_KEY_ESC) {
-                    break;
+                switch (event.data.key) {
+                    case GT_KEY_ESC:
+                        goto exit_loop;
+                    case GT_KEY_UP:
+                    case GT_KEY_LEFT:
+                        gt_focus_prev_widget(window);
+                        gt_render_all_widgets(window);
+                        gt_refresh_window(window);
+                        break;
+                    case GT_KEY_DOWN:
+                    case GT_KEY_RIGHT:
+                        gt_focus_next_widget(window);
+                        gt_render_all_widgets(window);
+                        gt_refresh_window(window);
+                        break;
+                    case GT_KEY_ENTER:
+                        gt_activate_focused_widget(window);
+                        break;
                 }
             }
         }
     }
+    
+    exit_loop:
     
     // Cleanup
     gt_destroy_window(window);

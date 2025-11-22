@@ -43,6 +43,7 @@ gt_window_t *gt_create_window(int x, int y, int width, int height, const char *t
     }
     window->visible = false;
     window->widgets = NULL;
+    window->focused_widget = NULL;
     
     return window;
 }

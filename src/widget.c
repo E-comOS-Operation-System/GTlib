@@ -32,10 +32,17 @@ gt_widget_t *gt_create_button(gt_window_t *window, int x, int y, int width, int 
     widget->height = height;
     widget->text = text ? strdup(text) : NULL;
     widget->visible = true;
+    widget->focused = false;
     widget->callback = callback;
     widget->user_data = user_data;
     widget->next = window->widgets;
     window->widgets = widget;
+    
+    // 如果这是第一个可交互控件，设为焦点
+    if (!window->focused_widget && widget->type == GT_WIDGET_BUTTON) {
+        window->focused_widget = widget;
+        widget->focused = true;
+    }
     
     return widget;
 }
@@ -54,6 +61,7 @@ gt_widget_t *gt_create_label(gt_window_t *window, int x, int y, const char *text
     widget->bg = bg;
     widget->attr = attr;
     widget->visible = true;
+    widget->focused = false;
     widget->next = window->widgets;
     window->widgets = widget;
     
@@ -73,8 +81,15 @@ gt_widget_t *gt_create_textbox(gt_window_t *window, int x, int y, int width, int
     widget->height = height;
     widget->text = text ? strdup(text) : NULL;
     widget->visible = true;
+    widget->focused = false;
     widget->next = window->widgets;
     window->widgets = widget;
+    
+    // 如果这是第一个可交互控件且没有其他焦点控件，设为焦点
+    if (!window->focused_widget && widget->type == GT_WIDGET_TEXTBOX) {
+        window->focused_widget = widget;
+        widget->focused = true;
+    }
     
     (void)max_length;
     return widget;
