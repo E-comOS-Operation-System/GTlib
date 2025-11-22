@@ -90,6 +90,15 @@ gt_window_t *gt_create_window(int x, int y, int width, int height, const char *t
 
 void gt_destroy_window(gt_window_t *window) {
     if (!window) return;
+    
+    // Free all widgets
+    gt_widget_t *widget = window->widgets;
+    while (widget) {
+        gt_widget_t *next = widget->next;
+        gt_destroy_widget(widget);
+        widget = next;
+    }
+    
     if (window->title) free(window->title);
     free(window);
 }
@@ -210,11 +219,80 @@ void gt_draw_border(gt_window_t *window, gt_color_t fg, gt_color_t bg, gt_attr_t
     gt_draw_char(window, window->width - 1, window->height - 1, '+', fg, bg, attr);
 }
 
+static void gt_draw_widget(gt_window_t *window, gt_widget_t *widget) {
+    if (!widget || !widget->visible) return;
+    
+    switch (widget->type) {
+        case GT_WIDGET_LABEL:
+            if (widget->text) {
+                gt_draw_string(window, widget->x, widget->y, widget->text, 
+                             widget->fg, widget->bg, widget->attr);
+            }
+            break;
+            
+        case GT_WIDGET_BUTTON: {
+            // Draw button border
+            for (int x = 0; x < widget->width; x++) {
+                gt_draw_char(window, widget->x + x, widget->y, '-', 
+                           GT_COLOR_WHITE, GT_COLOR_DEFAULT, GT_ATTR_NORMAL);
+                gt_draw_char(window, widget->x + x, widget->y + widget->height - 1, '-',
+                           GT_COLOR_WHITE, GT_COLOR_DEFAULT, GT_ATTR_NORMAL);
+            }
+            for (int y = 1; y < widget->height - 1; y++) {
+                gt_draw_char(window, widget->x, widget->y + y, '|',
+                           GT_COLOR_WHITE, GT_COLOR_DEFAULT, GT_ATTR_NORMAL);
+                gt_draw_char(window, widget->x + widget->width - 1, widget->y + y, '|',
+                           GT_COLOR_WHITE, GT_COLOR_DEFAULT, GT_ATTR_NORMAL);
+            }
+            // Draw button text centered
+            if (widget->text) {
+                int text_len = strlen(widget->text);
+                int text_x = widget->x + (widget->width - text_len) / 2;
+                int text_y = widget->y + widget->height / 2;
+                gt_draw_string(window, text_x, text_y, widget->text,
+                             GT_COLOR_CYAN, GT_COLOR_DEFAULT, GT_ATTR_BOLD);
+            }
+            break;
+        }
+        
+        case GT_WIDGET_TEXTBOX: {
+            // Draw textbox border
+            for (int x = 0; x < widget->width; x++) {
+                gt_draw_char(window, widget->x + x, widget->y, '-',
+                           GT_COLOR_WHITE, GT_COLOR_DEFAULT, GT_ATTR_NORMAL);
+                gt_draw_char(window, widget->x + x, widget->y + widget->height - 1, '-',
+                           GT_COLOR_WHITE, GT_COLOR_DEFAULT, GT_ATTR_NORMAL);
+            }
+            for (int y = 1; y < widget->height - 1; y++) {
+                gt_draw_char(window, widget->x, widget->y + y, '|',
+                           GT_COLOR_WHITE, GT_COLOR_DEFAULT, GT_ATTR_NORMAL);
+                gt_draw_char(window, widget->x + widget->width - 1, widget->y + y, '|',
+                           GT_COLOR_WHITE, GT_COLOR_DEFAULT, GT_ATTR_NORMAL);
+            }
+            // Draw textbox content
+            if (widget->text) {
+                gt_draw_string(window, widget->x + 1, widget->y + 1, widget->text,
+                             GT_COLOR_WHITE, GT_COLOR_DEFAULT, GT_ATTR_NORMAL);
+            }
+            break;
+        }
+    }
+}
+
 void gt_refresh_window(gt_window_t *window) {
-    (void)window;
+    if (!window || !window->visible) return;
+    
+    // Draw all widgets
+    gt_widget_t *widget = window->widgets;
+    while (widget) {
+        gt_draw_widget(window, widget);
+        widget = widget->next;
+    }
+    fflush(stdout);
 }
 
 void gt_refresh_all(void) {
+    fflush(stdout);
 }
 
 gt_widget_t *gt_create_button(gt_window_t *window, int x, int y, int width, int height, const char *text, gt_button_callback_t callback, void *user_data) {
@@ -323,6 +401,20 @@ void gt_destroy_widget(gt_widget_t *widget) {
 
 void gt_set_widget_focus(gt_widget_t *widget) {
     (void)widget;
+}
+
+void gt_set_cursor_position(int x, int y) {
+    printf("\033[%d;%dH", y + 1, x + 1);
+    fflush(stdout);
+}
+
+void gt_set_cursor_visibility(bool visible) {
+    if (visible) {
+        printf("\033[?25h");
+    } else {
+        printf("\033[?25l");
+    }
+    fflush(stdout);
 }
 
 int gt_wait_event(gt_event_t *event, int timeout) {

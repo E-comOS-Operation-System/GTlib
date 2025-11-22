@@ -4,8 +4,7 @@
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
+# the Free Software Foundation; either version 2 of the License.
 # ==============================================================================
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -Iinclude -Isrc
@@ -16,10 +15,14 @@ LIBDIR = lib
 SOURCES = $(wildcard $(SRCDIR)/*.c)
 OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 TARGET = $(LIBDIR)/libgtlib.a
+EXAMPLE = example
 
-.PHONY: all clean
+.PHONY: all clean example
 
 all: $(TARGET)
+
+example: $(TARGET)
+	$(CC) $(CFLAGS) example.c -L$(LIBDIR) -lgtlib -o $(EXAMPLE)
 
 $(TARGET): $(OBJECTS) | $(LIBDIR)
 	ar rcs $@ $^
@@ -34,4 +37,4 @@ $(LIBDIR):
 	mkdir -p $(LIBDIR)
 
 clean:
-	rm -rf $(OBJDIR) $(LIBDIR)
+	rm -rf $(OBJDIR) $(LIBDIR) $(EXAMPLE)

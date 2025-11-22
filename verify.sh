@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 
 frama-c -wp -wp-rte src/window.c -cpp-extra-args="-Iinclude -Isrc"
