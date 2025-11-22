@@ -1,0 +1,3 @@
+[ ] END DEVELOP OF E-comOS                                                                                          
+[ ] Remove head file (ECLib's) from GTlib repo                                                                      
+[ ] Edit head file location from  #include "../include/xxx.h"  to  #include <xxx.h>         

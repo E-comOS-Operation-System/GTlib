@@ -8,7 +8,7 @@
 void button_clicked(gt_widget_t *widget, void *user_data) {
     (void)widget;
     (void)user_data;
-    // 在屏幕底部显示按钮被点击的消息
+    // In screen show the button is clicked
     printf("\033[25;1H\033[K");
     printf("Button clicked! Press any key to continue...");
     fflush(stdout);
